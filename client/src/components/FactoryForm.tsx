@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/popover";
 import { Loader2, Upload, X, MapPin } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
+import { LocationPicker } from "@/components/LocationPicker";
 
 interface AddressSuggestion {
   display_name: string;
@@ -102,6 +103,8 @@ export function FactoryForm({
   const photo3 = form.watch("photo3");
   const city = form.watch("city");
   const address = form.watch("address");
+  const latitude = form.watch("latitude");
+  const longitude = form.watch("longitude");
   
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
@@ -264,6 +267,11 @@ export function FactoryForm({
     form.setValue("longitude", suggestion.lon);
     setShowAddressSuggestions(false);
     setAddressSuggestions([]);
+  };
+
+  const handleLocationSelect = (lat: string, lng: string) => {
+    form.setValue("latitude", lat);
+    form.setValue("longitude", lng);
   };
 
   const handleSubmit = async (data: FormValues) => {
@@ -502,6 +510,13 @@ export function FactoryForm({
                 )}
               />
             </div>
+
+            <LocationPicker
+              latitude={latitude}
+              longitude={longitude}
+              city={city}
+              onLocationSelect={handleLocationSelect}
+            />
 
             <FormField
               control={form.control}

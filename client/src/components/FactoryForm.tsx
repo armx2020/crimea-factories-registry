@@ -497,25 +497,21 @@ export function FactoryForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Сеть заводов (опционально)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value || undefined)} 
+                      value={field.value || undefined}
+                    >
                       <FormControl>
                         <SelectTrigger data-testid="select-network">
-                          <SelectValue placeholder="Выберите сеть" />
+                          <SelectValue placeholder={networksLoading ? "Загрузка..." : "Выберите сеть (опционально)"} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Не выбрано</SelectItem>
-                        {networksLoading ? (
-                          <SelectItem value="" disabled>
-                            Загрузка...
+                        {networks.map((network) => (
+                          <SelectItem key={network.id} value={network.id}>
+                            {network.name}
                           </SelectItem>
-                        ) : (
-                          networks.map((network) => (
-                            <SelectItem key={network.id} value={network.id}>
-                              {network.name}
-                            </SelectItem>
-                          ))
-                        )}
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

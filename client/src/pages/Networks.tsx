@@ -168,35 +168,37 @@ export default function Networks() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">
+    <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 overflow-x-hidden">
+      <div className="flex items-start sm:items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate" data-testid="text-page-title">
             Сети заводов
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Управление сетями бетонных заводов
           </p>
         </div>
         <Button
           onClick={() => handleOpenForm()}
           data-testid="button-add-network"
-          className="gap-2"
+          size="sm"
+          className="gap-1 sm:gap-2 shrink-0"
         >
           <Plus className="h-4 w-4" />
-          Добавить сеть
+          <span className="hidden sm:inline">Добавить сеть</span>
+          <span className="sm:hidden">Добавить</span>
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {networks.map((network) => (
           <Card
             key={network.id}
-            className="overflow-hidden hover-elevate active-elevate-2 transition-all"
+            className="overflow-hidden hover-elevate active-elevate-2 transition-all w-full"
             data-testid={`card-network-${network.id}`}
           >
-            <div className="flex flex-col sm:flex-row">
-              <div className="sm:w-32 shrink-0">
+            <div className="flex flex-col sm:flex-row w-full">
+              <div className="w-full sm:w-32 shrink-0">
                 {network.logo ? (
                   <div
                     className="h-24 sm:h-full bg-cover bg-center"
@@ -209,37 +211,38 @@ export default function Networks() {
                 )}
               </div>
 
-              <CardContent className="flex-1 p-4 space-y-2">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold leading-tight" data-testid="text-network-name">
+              <CardContent className="flex-1 p-3 sm:p-4 space-y-2 min-w-0">
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold leading-tight break-words" data-testid="text-network-name">
                       {network.name}
                     </h3>
                     {network.description && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 break-words">
                         {network.description}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleOpenForm(network)}
                     data-testid="button-edit-network"
-                    className="gap-2"
+                    className="gap-1 sm:gap-2 text-xs sm:text-sm"
                   >
                     <Edit className="h-3.5 w-3.5" />
-                    Редактировать
+                    <span className="hidden sm:inline">Редактировать</span>
+                    <span className="sm:hidden">Изменить</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(network.id)}
                     data-testid="button-delete-network"
-                    className="gap-2"
+                    className="gap-1 sm:gap-2 text-xs sm:text-sm"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Удалить
@@ -262,15 +265,15 @@ export default function Networks() {
       )}
 
       <Dialog open={isFormOpen} onOpenChange={handleCloseForm}>
-        <DialogContent className="max-w-2xl" data-testid="modal-network-form">
+        <DialogContent className="max-w-2xl w-[95vw] sm:w-full p-4 sm:p-6" data-testid="modal-network-form">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">
               {editingNetwork ? "Редактировать сеть" : "Добавить сеть"}
             </DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3 sm:space-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -339,26 +342,27 @@ export default function Networks() {
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col-reverse sm:flex-row gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseForm}
+                  data-testid="button-cancel-network"
+                  className="w-full sm:w-auto"
+                >
+                  Отмена
+                </Button>
                 <Button
                   type="submit"
                   disabled={createMutation.isPending || updateMutation.isPending}
                   data-testid="button-submit-network"
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                 >
                   {createMutation.isPending || updateMutation.isPending
                     ? "Сохранение..."
                     : editingNetwork
                     ? "Сохранить"
                     : "Создать"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCloseForm}
-                  data-testid="button-cancel-network"
-                >
-                  Отмена
                 </Button>
               </div>
             </form>

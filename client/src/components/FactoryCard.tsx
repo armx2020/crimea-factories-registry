@@ -1,7 +1,7 @@
 import { Factory } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Factory as FactoryIcon, ExternalLink } from "lucide-react";
+import { MapPin, Factory as FactoryIcon, ExternalLink, Search } from "lucide-react";
 
 interface FactoryCardProps {
   factory: Factory;
@@ -10,6 +10,15 @@ interface FactoryCardProps {
 
 export function FactoryCard({ factory, onEdit }: FactoryCardProps) {
   const photos = [factory.photo1, factory.photo2, factory.photo3].filter(Boolean);
+  
+  const getYandexSearchUrl = () => {
+    const searchParts = [factory.name, factory.city];
+    if (factory.website) {
+      searchParts.push(factory.website);
+    }
+    const searchQuery = searchParts.join(" ");
+    return `https://yandex.ru/search/?text=${encodeURIComponent(searchQuery)}`;
+  };
   
   return (
     <Card 
@@ -74,6 +83,18 @@ export function FactoryCard({ factory, onEdit }: FactoryCardProps) {
                 </Badge>
               </a>
             )}
+            <a 
+              href={getYandexSearchUrl()} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex"
+            >
+              <Badge variant="outline" className="gap-1.5 hover:bg-accent" data-testid={`badge-yandex-search-${factory.id}`}>
+                <Search className="h-3 w-3" />
+                <span>Поиск в Яндексе</span>
+              </Badge>
+            </a>
           </div>
           
           <p className="text-sm text-muted-foreground line-clamp-2" data-testid={`text-description-${factory.id}`}>

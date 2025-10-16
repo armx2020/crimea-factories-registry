@@ -19,6 +19,7 @@ export const factories = pgTable("factories", {
   yearlyOutput: integer("yearly_output").notNull(),
   description: text("description").notNull(),
   director: text("director"),
+  inn: text("inn"),
   website: text("website"),
   ranking: integer("ranking"),
   networkId: varchar("network_id"),

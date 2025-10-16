@@ -66,6 +66,12 @@ export function FactoryCard({ factory, onEdit }: FactoryCardProps) {
             </p>
           )}
           
+          {factory.inn && (
+            <p className="text-sm text-muted-foreground" data-testid={`text-inn-${factory.id}`}>
+              <span className="font-medium">ИНН:</span> {factory.inn}
+            </p>
+          )}
+          
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" data-testid={`badge-capacity-${factory.id}`}>
               <span className="font-mono">{factory.capacity}</span>

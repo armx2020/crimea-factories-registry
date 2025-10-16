@@ -43,6 +43,7 @@ const CRIMEA_CITIES = Object.keys(CITY_COORDINATES);
 
 const formSchema = insertFactorySchema.extend({
   director: z.string().optional(),
+  inn: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
   website: z.string().optional(),
@@ -84,6 +85,7 @@ export function FactoryForm({
       yearlyOutput: 0,
       description: "",
       director: "",
+      inn: "",
       website: "",
       ranking: 0,
       networkId: "",
@@ -120,6 +122,7 @@ export function FactoryForm({
         yearlyOutput: factory.yearlyOutput || 0,
         description: factory.description || "",
         director: factory.director || "",
+        inn: factory.inn || "",
         website: factory.website || "",
         ranking: factory.ranking || 0,
         networkId: factory.networkId || "",
@@ -139,6 +142,7 @@ export function FactoryForm({
         yearlyOutput: 0,
         description: "",
         director: "",
+        inn: "",
         website: "",
         ranking: 0,
         networkId: "",
@@ -591,6 +595,20 @@ export function FactoryForm({
                   <FormLabel>Директор (опционально)</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Иванов Иван Иванович" data-testid="input-director" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="inn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ИНН (опционально)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="9102003456" data-testid="input-inn" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

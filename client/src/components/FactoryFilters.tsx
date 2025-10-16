@@ -16,12 +16,14 @@ export interface FilterState {
   searchQuery: string;
   cities: string[];
   networks: string[];
+  hasNetwork?: boolean | null;
 }
 
 export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedNetworks, setSelectedNetworks] = useState<string[]>([]);
+  const [hasNetwork, setHasNetwork] = useState<boolean | null>(null);
 
   const { data: networks = [] } = useQuery<Network[]>({
     queryKey: ["/api/networks"],
@@ -61,12 +63,19 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
       .sort((a, b) => b.count - a.count);
   }, [factories, networks]);
 
+  const networkMembershipStats = useMemo(() => {
+    const withNetwork = factories.filter(f => f.networkId).length;
+    const withoutNetwork = factories.filter(f => !f.networkId).length;
+    return { withNetwork, withoutNetwork };
+  }, [factories]);
+
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     onFilterChange({
       searchQuery: value,
       cities: selectedCities,
       networks: selectedNetworks,
+      hasNetwork,
     });
   };
 
@@ -80,6 +89,7 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
       searchQuery,
       cities: newCities,
       networks: selectedNetworks,
+      hasNetwork,
     });
   };
 
@@ -93,6 +103,18 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
       searchQuery,
       cities: selectedCities,
       networks: newNetworks,
+      hasNetwork,
+    });
+  };
+
+  const handleNetworkMembershipToggle = (value: boolean) => {
+    const newValue = hasNetwork === value ? null : value;
+    setHasNetwork(newValue);
+    onFilterChange({
+      searchQuery,
+      cities: selectedCities,
+      networks: selectedNetworks,
+      hasNetwork: newValue,
     });
   };
 
@@ -100,10 +122,12 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
     setSearchQuery("");
     setSelectedCities([]);
     setSelectedNetworks([]);
+    setHasNetwork(null);
     onFilterChange({
       searchQuery: "",
       cities: [],
       networks: [],
+      hasNetwork: null,
     });
   };
 
@@ -156,6 +180,58 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
               </span>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">
+          Принадлежность к сети
+        </Label>
+        <div className="space-y-2">
+          <div
+            className="flex items-center justify-between gap-2"
+            data-testid="network-membership-filter-with"
+          >
+            <div className="flex items-center gap-2 flex-1">
+              <Checkbox
+                id="has-network-yes"
+                checked={hasNetwork === true}
+                onCheckedChange={() => handleNetworkMembershipToggle(true)}
+                data-testid="checkbox-has-network-yes"
+              />
+              <label
+                htmlFor="has-network-yes"
+                className="text-sm cursor-pointer flex-1"
+              >
+                В сети
+              </label>
+            </div>
+            <span className="text-sm text-muted-foreground font-mono">
+              {networkMembershipStats.withNetwork}
+            </span>
+          </div>
+          <div
+            className="flex items-center justify-between gap-2"
+            data-testid="network-membership-filter-without"
+          >
+            <div className="flex items-center gap-2 flex-1">
+              <Checkbox
+                id="has-network-no"
+                checked={hasNetwork === false}
+                onCheckedChange={() => handleNetworkMembershipToggle(false)}
+                data-testid="checkbox-has-network-no"
+              />
+              <label
+                htmlFor="has-network-no"
+                className="text-sm cursor-pointer flex-1"
+              >
+                Отдельные заводы
+              </label>
+            </div>
+            <span className="text-sm text-muted-foreground font-mono">
+              {networkMembershipStats.withoutNetwork}
+            </span>
+          </div>
         </div>
       </div>
 

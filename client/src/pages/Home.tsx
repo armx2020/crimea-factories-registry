@@ -39,6 +39,7 @@ export default function Home() {
     searchQuery: "",
     cities: [],
     networks: [],
+    hasNetwork: null,
   });
 
   const { data: factories = [], isLoading } = useQuery<Factory[]>({
@@ -119,6 +120,10 @@ export default function Home() {
         if (!factory.networkId || !filters.networks.includes(factory.networkId)) {
           return false;
         }
+      }
+      if (filters.hasNetwork !== null && filters.hasNetwork !== undefined) {
+        if (filters.hasNetwork === true && !factory.networkId) return false;
+        if (filters.hasNetwork === false && factory.networkId) return false;
       }
       return true;
     })

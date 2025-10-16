@@ -36,7 +36,7 @@ export default function Networks() {
 
   const createMutation = useMutation({
     mutationFn: (data: InsertNetwork) =>
-      apiRequest("/api/networks", "POST", data),
+      apiRequest("POST", "/api/networks", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/networks"] });
       toast({
@@ -56,7 +56,7 @@ export default function Networks() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<InsertNetwork> }) =>
-      apiRequest(`/api/networks/${id}`, "PUT", data),
+      apiRequest("PUT", `/api/networks/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/networks"] });
       toast({
@@ -76,7 +76,7 @@ export default function Networks() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/networks/${id}`, "DELETE"),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/networks/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/networks"] });
       toast({

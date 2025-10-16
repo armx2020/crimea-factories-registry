@@ -309,7 +309,10 @@ export default function Networks() {
               />
 
               <div className="space-y-3">
-                <FormLabel>Логотип (опционально)</FormLabel>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Логотип (опционально)</FormLabel>
+                  <p className="text-xs text-muted-foreground">Совет: используйте Ctrl+V для вставки из буфера</p>
+                </div>
                 {logo ? (
                   <div className="relative aspect-video rounded-md overflow-hidden border max-w-xs">
                     <img

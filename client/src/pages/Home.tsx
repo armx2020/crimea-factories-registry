@@ -202,6 +202,24 @@ export default function Home() {
                 </span>
               </div>
               <FactoryFilters factories={factories} onFilterChange={setFilters} />
+              
+              <div className="rounded-lg border bg-card p-4 space-y-3" data-testid="summary-stats">
+                <h3 className="font-semibold text-sm text-muted-foreground">Сводка</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Всего заводов:</span>
+                    <span className="text-lg font-semibold" data-testid="text-total-factories">
+                      {filteredFactories.length}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Суммарная мощность:</span>
+                    <span className="text-lg font-semibold" data-testid="text-total-capacity">
+                      {filteredFactories.reduce((sum, f) => sum + (f.capacity || 0), 0).toLocaleString('ru-RU')} м³/ч
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </aside>
 

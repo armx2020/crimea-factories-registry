@@ -241,8 +241,6 @@ export default function Home() {
                           key={factory.id}
                           factory={factory}
                           onView={handleViewFactory}
-                          onEdit={handleEditFactory}
-                          onDelete={handleDeleteFactory}
                         />
                       ))}
                     </div>
@@ -286,6 +284,7 @@ export default function Home() {
           setSelectedFactory(null);
         }}
         onEdit={handleEditFactory}
+        onDelete={handleDeleteFactory}
       />
 
       <AlertDialog

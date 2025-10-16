@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Factory as FactoryIcon, Pencil, X } from "lucide-react";
+import { MapPin, Factory as FactoryIcon, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 interface FactoryDetailsModalProps {
@@ -15,6 +15,7 @@ interface FactoryDetailsModalProps {
   open: boolean;
   onClose: () => void;
   onEdit: (factory: Factory) => void;
+  onDelete: (factory: Factory) => void;
 }
 
 export function FactoryDetailsModal({
@@ -22,6 +23,7 @@ export function FactoryDetailsModal({
   open,
   onClose,
   onEdit,
+  onDelete,
 }: FactoryDetailsModalProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
@@ -43,15 +45,26 @@ export function FactoryDetailsModal({
                 <span data-testid="text-modal-factory-city">{factory.city}</span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(factory)}
-              data-testid="button-modal-edit"
-            >
-              <Pencil className="h-4 w-4 mr-2" />
-              Редактировать
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(factory)}
+                data-testid="button-modal-edit"
+              >
+                <Pencil className="h-4 w-4 mr-2" />
+                Редактировать
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete(factory)}
+                data-testid="button-modal-delete"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Удалить
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
@@ -60,7 +73,7 @@ export function FactoryDetailsModal({
             <div className="space-y-3">
               <div className="aspect-video rounded-lg overflow-hidden bg-muted">
                 <img
-                  src={photos[currentPhotoIndex]}
+                  src={photos[currentPhotoIndex] || ""}
                   alt={`Фото ${currentPhotoIndex + 1}`}
                   className="w-full h-full object-cover"
                   data-testid={`img-factory-photo-${currentPhotoIndex}`}
@@ -80,7 +93,7 @@ export function FactoryDetailsModal({
                       data-testid={`button-photo-thumbnail-${idx}`}
                     >
                       <img
-                        src={photo}
+                        src={photo || ""}
                         alt={`Миниатюра ${idx + 1}`}
                         className="w-full h-full object-cover"
                       />

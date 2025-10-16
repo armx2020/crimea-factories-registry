@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Factory, insertFactorySchema } from "@shared/schema";
 import { z } from "zod";
+import { useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -50,20 +51,54 @@ export function FactoryForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: factory?.name || "",
-      city: factory?.city || "",
-      model: factory?.model || "",
-      address: factory?.address || "",
-      capacity: factory?.capacity || 0,
-      yearlyOutput: factory?.yearlyOutput || 0,
-      description: factory?.description || "",
-      latitude: factory?.latitude || "",
-      longitude: factory?.longitude || "",
-      photo1: factory?.photo1 || "",
-      photo2: factory?.photo2 || "",
-      photo3: factory?.photo3 || "",
+      name: "",
+      city: "",
+      model: "",
+      address: "",
+      capacity: 0,
+      yearlyOutput: 0,
+      description: "",
+      latitude: "",
+      longitude: "",
+      photo1: "",
+      photo2: "",
+      photo3: "",
     },
   });
+
+  useEffect(() => {
+    if (factory) {
+      form.reset({
+        name: factory.name || "",
+        city: factory.city || "",
+        model: factory.model || "",
+        address: factory.address || "",
+        capacity: factory.capacity || 0,
+        yearlyOutput: factory.yearlyOutput || 0,
+        description: factory.description || "",
+        latitude: factory.latitude || "",
+        longitude: factory.longitude || "",
+        photo1: factory.photo1 || "",
+        photo2: factory.photo2 || "",
+        photo3: factory.photo3 || "",
+      });
+    } else {
+      form.reset({
+        name: "",
+        city: "",
+        model: "",
+        address: "",
+        capacity: 0,
+        yearlyOutput: 0,
+        description: "",
+        latitude: "",
+        longitude: "",
+        photo1: "",
+        photo2: "",
+        photo3: "",
+      });
+    }
+  }, [factory, form]);
 
   const handlePhotoUploaded = (photoNum: number, photoUrl: string) => {
     form.setValue(`photo${photoNum}` as "photo1" | "photo2" | "photo3", photoUrl);
@@ -75,7 +110,6 @@ export function FactoryForm({
 
   const handleSubmit = async (data: FormValues) => {
     await onSubmit(data);
-    form.reset();
   };
 
   const photo1 = form.watch("photo1");

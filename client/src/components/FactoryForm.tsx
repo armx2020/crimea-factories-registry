@@ -29,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Upload, X, MapPin, ExternalLink } from "lucide-react";
+import { Loader2, Upload, X, MapPin, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { LocationPicker } from "@/components/LocationPicker";
 
@@ -216,6 +216,14 @@ export function FactoryForm({
 
   const handleRemovePhoto = (photoNum: number) => {
     form.setValue(`photo${photoNum}` as "photo1" | "photo2" | "photo3", "");
+  };
+
+  const handleMovePhoto = (fromIndex: number, toIndex: number) => {
+    const fromPhoto = fromIndex === 1 ? photo1 : fromIndex === 2 ? photo2 : photo3;
+    const toPhoto = toIndex === 1 ? photo1 : toIndex === 2 ? photo2 : photo3;
+    
+    form.setValue(`photo${fromIndex}` as "photo1" | "photo2" | "photo3", toPhoto);
+    form.setValue(`photo${toIndex}` as "photo1" | "photo2" | "photo3", fromPhoto);
   };
 
   const searchAddress = useCallback(async (query: string, cityName: string) => {
@@ -633,16 +641,42 @@ export function FactoryForm({
                             alt={`Фото ${num}`}
                             className="w-full h-full object-cover"
                           />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2"
-                            onClick={() => handleRemovePhoto(num)}
-                            data-testid={`button-remove-photo-${num}`}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          <div className="absolute top-2 right-2 flex gap-1">
+                            {num > 1 && (
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleMovePhoto(num, num - 1)}
+                                data-testid={`button-move-photo-left-${num}`}
+                              >
+                                <ChevronLeft className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {num < 3 && (
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleMovePhoto(num, num + 1)}
+                                data-testid={`button-move-photo-right-${num}`}
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleRemovePhoto(num)}
+                              data-testid={`button-remove-photo-${num}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       ) : (
                         <PhotoUploader

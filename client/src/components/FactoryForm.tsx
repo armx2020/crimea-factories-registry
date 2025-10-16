@@ -66,6 +66,10 @@ export function FactoryForm({
     },
   });
 
+  const photo1 = form.watch("photo1");
+  const photo2 = form.watch("photo2");
+  const photo3 = form.watch("photo3");
+
   useEffect(() => {
     if (factory) {
       form.reset({
@@ -100,6 +104,61 @@ export function FactoryForm({
     }
   }, [factory, form]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (!file) continue;
+
+          const photos = [photo1, photo2, photo3];
+          const emptyPhotoIndex = photos.findIndex(p => !p);
+          
+          if (emptyPhotoIndex === -1) {
+            alert("Все слоты для фотографий заняты");
+            return;
+          }
+
+          try {
+            const { uploadURL, filePath } = await fetch("/api/objects/upload", {
+              method: "POST",
+            }).then(r => r.json());
+
+            const uploadResponse = await fetch(uploadURL, {
+              method: 'PUT',
+              body: file,
+              headers: {
+                'Content-Type': file.type,
+              },
+            });
+
+            if (!uploadResponse.ok) {
+              throw new Error('Failed to upload file');
+            }
+
+            form.setValue(`photo${emptyPhotoIndex + 1}` as "photo1" | "photo2" | "photo3", filePath);
+          } catch (error) {
+            console.error('Upload error:', error);
+            alert("Ошибка при загрузке фото из буфера обмена");
+          }
+          break;
+        }
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => {
+      document.removeEventListener('paste', handlePaste);
+    };
+  }, [open, photo1, photo2, photo3, form]);
+
   const handlePhotoUploaded = (photoNum: number, photoUrl: string) => {
     form.setValue(`photo${photoNum}` as "photo1" | "photo2" | "photo3", photoUrl);
   };
@@ -111,10 +170,6 @@ export function FactoryForm({
   const handleSubmit = async (data: FormValues) => {
     await onSubmit(data);
   };
-
-  const photo1 = form.watch("photo1");
-  const photo2 = form.watch("photo2");
-  const photo3 = form.watch("photo3");
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -273,7 +328,10 @@ export function FactoryForm({
             />
 
             <div className="space-y-3">
-              <FormLabel>Фотографии (до 3 шт.)</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Фотографии (до 3 шт.)</FormLabel>
+                <p className="text-xs text-muted-foreground">Совет: используйте Ctrl+V для вставки из буфера</p>
+              </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 {[1, 2, 3].map((num) => {
                   const photoValue = num === 1 ? photo1 : num === 2 ? photo2 : photo3;

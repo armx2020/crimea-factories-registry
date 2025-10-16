@@ -7,6 +7,7 @@ export const networks = pgTable("networks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   description: text("description"),
+  logo: text("logo"),
 });
 
 export const factories = pgTable("factories", {

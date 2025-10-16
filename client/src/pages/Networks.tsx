@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { type Network, type InsertNetwork, insertNetworkSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, Trash2, Edit, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
@@ -24,6 +24,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { PhotoUploader } from "@/components/PhotoUploader";
+import { z } from "zod";
+
+const formSchema = insertNetworkSchema.extend({
+  logo: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function Networks() {
   const { toast } = useToast();
@@ -35,7 +43,7 @@ export default function Networks() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertNetwork) =>
+    mutationFn: (data: FormValues) =>
       apiRequest("POST", "/api/networks", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/networks"] });
@@ -55,7 +63,7 @@ export default function Networks() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<InsertNetwork> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<FormValues> }) =>
       apiRequest("PUT", `/api/networks/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/networks"] });
@@ -93,13 +101,16 @@ export default function Networks() {
     },
   });
 
-  const form = useForm<InsertNetwork>({
-    resolver: zodResolver(insertNetworkSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
+      logo: "",
     },
   });
+
+  const logo = form.watch("logo");
 
   const handleOpenForm = (network?: Network) => {
     if (network) {
@@ -107,12 +118,14 @@ export default function Networks() {
       form.reset({
         name: network.name,
         description: network.description || "",
+        logo: network.logo || "",
       });
     } else {
       setEditingNetwork(null);
       form.reset({
         name: "",
         description: "",
+        logo: "",
       });
     }
     setIsFormOpen(true);
@@ -124,7 +137,7 @@ export default function Networks() {
     form.reset();
   };
 
-  const handleSubmit = async (data: InsertNetwork) => {
+  const handleSubmit = async (data: FormValues) => {
     if (editingNetwork) {
       await updateMutation.mutateAsync({ id: editingNetwork.id, data });
     } else {
@@ -136,6 +149,14 @@ export default function Networks() {
     if (confirm("Вы уверены, что хотите удалить эту сеть?")) {
       await deleteMutation.mutateAsync(id);
     }
+  };
+
+  const handleLogoUploaded = (photoUrl: string) => {
+    form.setValue("logo", photoUrl);
+  };
+
+  const handleRemoveLogo = () => {
+    form.setValue("logo", "");
   };
 
   if (isLoading) {
@@ -167,45 +188,64 @@ export default function Networks() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="space-y-4">
         {networks.map((network) => (
           <Card
             key={network.id}
-            className="p-4 space-y-3"
+            className="overflow-hidden hover-elevate active-elevate-2 transition-all"
             data-testid={`card-network-${network.id}`}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg" data-testid="text-network-name">
-                  {network.name}
-                </h3>
-                {network.description && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {network.description}
-                  </p>
+            <div className="flex flex-col sm:flex-row">
+              <div className="sm:w-32 shrink-0">
+                {network.logo ? (
+                  <div
+                    className="h-24 sm:h-full bg-cover bg-center"
+                    style={{ backgroundImage: `url(${network.logo})` }}
+                  />
+                ) : (
+                  <div className="h-24 sm:h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                    <Building2 className="h-10 w-10 text-primary/30" />
+                  </div>
                 )}
               </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleOpenForm(network)}
-                data-testid="button-edit-network"
-                className="gap-2 flex-1"
-              >
-                <Edit className="h-3.5 w-3.5" />
-                Редактировать
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDelete(network.id)}
-                data-testid="button-delete-network"
-                className="gap-2"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+
+              <CardContent className="flex-1 p-4 space-y-2">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold leading-tight" data-testid="text-network-name">
+                      {network.name}
+                    </h3>
+                    {network.description && (
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        {network.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleOpenForm(network)}
+                    data-testid="button-edit-network"
+                    className="gap-2"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                    Редактировать
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(network.id)}
+                    data-testid="button-delete-network"
+                    className="gap-2"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Удалить
+                  </Button>
+                </div>
+              </CardContent>
             </div>
           </Card>
         ))}
@@ -222,7 +262,7 @@ export default function Networks() {
       )}
 
       <Dialog open={isFormOpen} onOpenChange={handleCloseForm}>
-        <DialogContent data-testid="modal-network-form">
+        <DialogContent className="max-w-2xl" data-testid="modal-network-form">
           <DialogHeader>
             <DialogTitle>
               {editingNetwork ? "Редактировать сеть" : "Добавить сеть"}
@@ -268,6 +308,34 @@ export default function Networks() {
                 )}
               />
 
+              <div className="space-y-3">
+                <FormLabel>Логотип (опционально)</FormLabel>
+                {logo ? (
+                  <div className="relative aspect-video rounded-md overflow-hidden border max-w-xs">
+                    <img
+                      src={logo}
+                      alt="Логотип сети"
+                      className="w-full h-full object-contain bg-muted"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={handleRemoveLogo}
+                      data-testid="button-remove-logo"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <PhotoUploader
+                    onPhotoUploaded={handleLogoUploaded}
+                    buttonText="Загрузить логотип"
+                  />
+                )}
+              </div>
+
               <div className="flex gap-2">
                 <Button
                   type="submit"
@@ -275,7 +343,11 @@ export default function Networks() {
                   data-testid="button-submit-network"
                   className="flex-1"
                 >
-                  {editingNetwork ? "Сохранить" : "Создать"}
+                  {createMutation.isPending || updateMutation.isPending
+                    ? "Сохранение..."
+                    : editingNetwork
+                    ? "Сохранить"
+                    : "Создать"}
                 </Button>
                 <Button
                   type="button"

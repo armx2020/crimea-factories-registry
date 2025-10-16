@@ -35,7 +35,8 @@ export function PhotoUploader({
 
     setIsUploading(true);
     try {
-      const { uploadURL, filePath } = await apiRequest<{ uploadURL: string; filePath: string }>("POST", "/api/objects/upload");
+      const response = await apiRequest("POST", "/api/objects/upload");
+      const { uploadURL, filePath } = await response.json();
       
       const uploadResponse = await fetch(uploadURL, {
         method: 'PUT',

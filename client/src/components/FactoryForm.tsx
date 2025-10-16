@@ -227,14 +227,14 @@ export function FactoryForm({
 
     setIsSearchingAddress(true);
     try {
-      const searchQuery = `${query}, ${cityName}`;
+      const searchQuery = `${query}, ${cityName}, Россия`;
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?` +
-        `q=${encodeURIComponent(searchQuery)}&` +
+        `street=${encodeURIComponent(query)}&` +
+        `city=${encodeURIComponent(cityName)}&` +
+        `country=Russia&` +
         `format=json&` +
         `limit=5&` +
-        `viewbox=32.5,44.4,36.7,46.2&` +
-        `bounded=1&` +
         `addressdetails=1`,
         {
           headers: {

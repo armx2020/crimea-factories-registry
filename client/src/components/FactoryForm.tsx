@@ -42,6 +42,7 @@ interface AddressSuggestion {
 const CRIMEA_CITIES = Object.keys(CITY_COORDINATES);
 
 const formSchema = insertFactorySchema.extend({
+  director: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
   website: z.string().optional(),
@@ -82,6 +83,7 @@ export function FactoryForm({
       capacity: 0,
       yearlyOutput: 0,
       description: "",
+      director: "",
       website: "",
       ranking: 0,
       networkId: "",
@@ -117,6 +119,7 @@ export function FactoryForm({
         capacity: factory.capacity || 0,
         yearlyOutput: factory.yearlyOutput || 0,
         description: factory.description || "",
+        director: factory.director || "",
         website: factory.website || "",
         ranking: factory.ranking || 0,
         networkId: factory.networkId || "",
@@ -135,6 +138,7 @@ export function FactoryForm({
         capacity: 0,
         yearlyOutput: 0,
         description: "",
+        director: "",
         website: "",
         ranking: 0,
         networkId: "",
@@ -573,6 +577,20 @@ export function FactoryForm({
                       className="min-h-32"
                       data-testid="textarea-description"
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="director"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Директор (опционально)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Иванов Иван Иванович" data-testid="input-director" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

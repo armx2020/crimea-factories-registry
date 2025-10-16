@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, ChevronDown } from "lucide-react";
+import { X } from "lucide-react";
 
 interface FactoryFiltersProps {
   factories: Factory[];
@@ -24,7 +24,6 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
 
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [capacityRange, setCapacityRange] = useState<[number, number]>([minCap, maxCap]);
-  const [showAllCities, setShowAllCities] = useState(false);
 
   const cityStats = useMemo(() => {
     const stats = new Map<string, number>();
@@ -38,8 +37,6 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
       .map(([city, count]) => ({ city, count }))
       .sort((a, b) => a.city.localeCompare(b.city));
   }, [factories]);
-
-  const displayedCities = showAllCities ? cityStats : cityStats.slice(0, 5);
 
   const handleCityToggle = (city: string) => {
     const newCities = selectedCities.includes(city)
@@ -81,7 +78,7 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
           Города
         </Label>
         <div className="space-y-2">
-          {displayedCities.map(({ city, count }) => (
+          {cityStats.map(({ city, count }) => (
             <div
               key={city}
               className="flex items-center justify-between gap-2"
@@ -106,18 +103,6 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
               </span>
             </div>
           ))}
-          {cityStats.length > 5 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAllCities(!showAllCities)}
-              className="w-full gap-2"
-              data-testid="button-toggle-cities"
-            >
-              {showAllCities ? "Показать меньше" : "Показать еще"}
-              <ChevronDown className={`h-4 w-4 transition-transform ${showAllCities ? "rotate-180" : ""}`} />
-            </Button>
-          )}
         </div>
       </div>
 

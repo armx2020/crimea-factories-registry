@@ -31,7 +31,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/factories", async (req, res) => {
     try {
-      const validatedData = insertFactorySchema.parse(req.body);
+      const cleanedData = {
+        ...req.body,
+        latitude: req.body.latitude === "" ? null : req.body.latitude,
+        longitude: req.body.longitude === "" ? null : req.body.longitude,
+        photo1: req.body.photo1 === "" ? null : req.body.photo1,
+        photo2: req.body.photo2 === "" ? null : req.body.photo2,
+        photo3: req.body.photo3 === "" ? null : req.body.photo3,
+      };
+      const validatedData = insertFactorySchema.parse(cleanedData);
       const factory = await storage.createFactory(validatedData);
       res.status(201).json(factory);
     } catch (error) {
@@ -45,7 +53,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/factories/:id", async (req, res) => {
     try {
-      const validatedData = insertFactorySchema.partial().parse(req.body);
+      const cleanedData = {
+        ...req.body,
+        latitude: req.body.latitude === "" ? null : req.body.latitude,
+        longitude: req.body.longitude === "" ? null : req.body.longitude,
+        photo1: req.body.photo1 === "" ? null : req.body.photo1,
+        photo2: req.body.photo2 === "" ? null : req.body.photo2,
+        photo3: req.body.photo3 === "" ? null : req.body.photo3,
+      };
+      const validatedData = insertFactorySchema.partial().parse(cleanedData);
       const factory = await storage.updateFactory(req.params.id, validatedData);
       if (!factory) {
         return res.status(404).json({ error: "Factory not found" });

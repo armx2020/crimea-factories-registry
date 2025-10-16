@@ -58,7 +58,7 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
     
     return Array.from(stats.entries())
       .map(([id, { name, count }]) => ({ id, name, count }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => b.count - a.count);
   }, [factories, networks]);
 
   const handleSearchChange = (value: string) => {

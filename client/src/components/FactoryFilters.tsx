@@ -18,7 +18,7 @@ export interface FilterState {
 }
 
 export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProps) {
-  const cities = Array.from(new Set(factories.map(f => f.city))).sort();
+  const cities = Array.from(new Set(factories.map(f => f.city).filter(c => c && c.trim() !== ""))).sort();
   const capacities = factories.map(f => f.capacity);
   const minCap = Math.min(...capacities, 0);
   const maxCap = Math.max(...capacities, 1000);

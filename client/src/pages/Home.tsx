@@ -235,7 +235,7 @@ export default function Home() {
               <>
                 {viewMode === "list" ? (
                   filteredFactories.length > 0 ? (
-                    <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                    <div className="space-y-4">
                       {filteredFactories.map((factory) => (
                         <FactoryCard
                           key={factory.id}

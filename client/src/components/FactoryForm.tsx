@@ -298,16 +298,16 @@ export function FactoryForm({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="modal-factory-form">
+      <DialogContent className="max-w-4xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6" data-testid="modal-factory-form">
         <DialogHeader>
-          <DialogTitle data-testid="text-form-title">
+          <DialogTitle className="text-base sm:text-lg" data-testid="text-form-title">
             {factory ? "Редактировать завод" : "Добавить завод"}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 sm:space-y-6">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="name"
@@ -624,11 +624,11 @@ export function FactoryForm({
             />
 
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                 <FormLabel>Фотографии (до 3 шт.)</FormLabel>
                 <p className="text-xs text-muted-foreground">Совет: используйте Ctrl+V для вставки из буфера</p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
                 {[1, 2, 3].map((num) => {
                   const photoValue = num === 1 ? photo1 : num === 2 ? photo2 : photo3;
 
@@ -692,17 +692,18 @@ export function FactoryForm({
               </div>
             </div>
 
-            <div className="flex gap-3 justify-end pt-4">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 justify-end pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={isPending}
                 data-testid="button-cancel"
+                className="w-full sm:w-auto"
               >
                 Отменить
               </Button>
-              <Button type="submit" disabled={isPending} data-testid="button-submit">
+              <Button type="submit" disabled={isPending} data-testid="button-submit" className="w-full sm:w-auto">
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {factory ? "Сохранить" : "Добавить"}
               </Button>

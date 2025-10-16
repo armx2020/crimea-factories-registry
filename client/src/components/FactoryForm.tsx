@@ -1,9 +1,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Factory, insertFactorySchema } from "@shared/schema";
+import { Factory, insertFactorySchema, type Network } from "@shared/schema";
 import { CITY_COORDINATES } from "@shared/cityCoordinates";
 import { z } from "zod";
 import { useEffect, useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Form,
   FormControl,
@@ -56,6 +57,7 @@ const formSchema = insertFactorySchema.extend({
   latitude: z.string().optional(),
   longitude: z.string().optional(),
   website: z.string().optional(),
+  networkId: z.string().optional(),
   photo1: z.string().optional(),
   photo2: z.string().optional(),
   photo3: z.string().optional(),
@@ -78,6 +80,10 @@ export function FactoryForm({
   onSubmit,
   isPending,
 }: FactoryFormProps) {
+  const { data: networks = [], isLoading: networksLoading } = useQuery<Network[]>({
+    queryKey: ["/api/networks"],
+  });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,6 +96,7 @@ export function FactoryForm({
       description: "",
       website: "",
       ranking: 0,
+      networkId: "",
       latitude: "",
       longitude: "",
       photo1: "",
@@ -124,6 +131,7 @@ export function FactoryForm({
         description: factory.description || "",
         website: factory.website || "",
         ranking: factory.ranking || 0,
+        networkId: factory.networkId || "",
         latitude: factory.latitude || "",
         longitude: factory.longitude || "",
         photo1: factory.photo1 || "",
@@ -141,6 +149,7 @@ export function FactoryForm({
         description: "",
         website: "",
         ranking: 0,
+        networkId: "",
         latitude: "",
         longitude: "",
         photo1: "",
@@ -477,6 +486,38 @@ export function FactoryForm({
                         data-testid="input-ranking"
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="networkId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Сеть заводов (опционально)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-network">
+                          <SelectValue placeholder="Выберите сеть" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Не выбрано</SelectItem>
+                        {networksLoading ? (
+                          <SelectItem value="" disabled>
+                            Загрузка...
+                          </SelectItem>
+                        ) : (
+                          networks.map((network) => (
+                            <SelectItem key={network.id} value={network.id}>
+                              {network.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

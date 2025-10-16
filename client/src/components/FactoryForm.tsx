@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Factory, insertFactorySchema } from "@shared/schema";
 import { CITY_COORDINATES } from "@shared/cityCoordinates";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Form,
   FormControl,
@@ -28,8 +28,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Upload, X } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Loader2, Upload, X, MapPin } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
+
+interface AddressSuggestion {
+  display_name: string;
+  lat: string;
+  lon: string;
+}
 
 const CRIMEA_CITIES = Object.keys(CITY_COORDINATES);
 
@@ -79,6 +97,12 @@ export function FactoryForm({
   const photo1 = form.watch("photo1");
   const photo2 = form.watch("photo2");
   const photo3 = form.watch("photo3");
+  const city = form.watch("city");
+  const address = form.watch("address");
+  
+  const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -179,6 +203,62 @@ export function FactoryForm({
     form.setValue(`photo${photoNum}` as "photo1" | "photo2" | "photo3", "");
   };
 
+  const searchAddress = useCallback(async (query: string, cityName: string) => {
+    if (!query || query.length < 3 || !cityName) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    setIsSearchingAddress(true);
+    try {
+      const searchQuery = `${query}, ${cityName}, Крым`;
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?` +
+        `q=${encodeURIComponent(searchQuery)}&` +
+        `format=json&` +
+        `limit=5&` +
+        `countrycodes=ru&` +
+        `addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'Factory Registry App'
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setAddressSuggestions(data);
+        setShowAddressSuggestions(data.length > 0);
+      }
+    } catch (error) {
+      console.error('Address search error:', error);
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (address && city) {
+        searchAddress(address, city);
+      } else {
+        setAddressSuggestions([]);
+        setShowAddressSuggestions(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [address, city, searchAddress]);
+
+  const handleSelectAddress = (suggestion: AddressSuggestion) => {
+    form.setValue("address", suggestion.display_name);
+    form.setValue("latitude", suggestion.lat);
+    form.setValue("longitude", suggestion.lon);
+    setShowAddressSuggestions(false);
+    setAddressSuggestions([]);
+  };
+
   const handleSubmit = async (data: FormValues) => {
     await onSubmit(data);
   };
@@ -264,9 +344,47 @@ export function FactoryForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Адрес</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="ул. Промышленная, 5" data-testid="input-address" />
-                    </FormControl>
+                    <Popover open={showAddressSuggestions} onOpenChange={setShowAddressSuggestions}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <div className="relative">
+                            <Input 
+                              {...field} 
+                              placeholder="ул. Промышленная, 5" 
+                              data-testid="input-address"
+                              onFocus={() => {
+                                if (addressSuggestions.length > 0) {
+                                  setShowAddressSuggestions(true);
+                                }
+                              }}
+                            />
+                            {isSearchingAddress && (
+                              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                            )}
+                          </div>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0" align="start">
+                        <Command>
+                          <CommandList>
+                            <CommandEmpty>Адреса не найдены</CommandEmpty>
+                            <CommandGroup>
+                              {addressSuggestions.map((suggestion, index) => (
+                                <CommandItem
+                                  key={index}
+                                  value={suggestion.display_name}
+                                  onSelect={() => handleSelectAddress(suggestion)}
+                                  className="cursor-pointer"
+                                >
+                                  <MapPin className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                                  <span className="text-sm">{suggestion.display_name}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}

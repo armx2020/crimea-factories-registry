@@ -30,6 +30,65 @@ export class ObjectNotFoundError extends Error {
   }
 }
 
+function parseObjectPath(path: string): {
+  bucketName: string;
+  objectName: string;
+} {
+  if (!path.startsWith("/")) {
+    path = `/${path}`;
+  }
+  const pathParts = path.split("/");
+  if (pathParts.length < 3) {
+    throw new Error("Invalid path: must contain at least a bucket name");
+  }
+
+  const bucketName = pathParts[1];
+  const objectName = pathParts.slice(2).join("/");
+
+  return {
+    bucketName,
+    objectName,
+  };
+}
+
+async function signObjectURL({
+  bucketName,
+  objectName,
+  method,
+  ttlSec,
+}: {
+  bucketName: string;
+  objectName: string;
+  method: "GET" | "PUT" | "DELETE" | "HEAD";
+  ttlSec: number;
+}): Promise<string> {
+  const request = {
+    bucket_name: bucketName,
+    object_name: objectName,
+    method,
+    expires_at: new Date(Date.now() + ttlSec * 1000).toISOString(),
+  };
+  const response = await fetch(
+    `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to sign object URL, errorcode: ${response.status}, ` +
+        `make sure you're running on Replit`
+    );
+  }
+
+  const { signed_url: signedURL } = await response.json();
+  return signedURL;
+}
+
 export class ObjectStorageService {
   constructor() {}
 
@@ -54,7 +113,9 @@ export class ObjectStorageService {
     const searchPaths = this.getPublicObjectSearchPaths();
     for (const searchPath of searchPaths) {
       const fullPath = `${searchPath}/${filePath}`;
-      const file = objectStorageClient.bucket("").file(fullPath);
+      const { bucketName, objectName } = parseObjectPath(fullPath);
+      const bucket = objectStorageClient.bucket(bucketName);
+      const file = bucket.file(objectName);
       const [exists] = await file.exists();
       if (exists) {
         return file;
@@ -64,43 +125,79 @@ export class ObjectStorageService {
   }
 
   async getObjectEntityFile(objectPath: string): Promise<File> {
-    const normalizedPath = this.normalizeObjectEntityPath(objectPath);
-    const file = objectStorageClient.bucket("").file(normalizedPath);
-    const [exists] = await file.exists();
+    if (!objectPath.startsWith("/objects/")) {
+      throw new ObjectNotFoundError();
+    }
+
+    const parts = objectPath.slice(1).split("/");
+    if (parts.length < 2) {
+      throw new ObjectNotFoundError();
+    }
+
+    const entityId = parts.slice(1).join("/");
+    let entityDir = this.getPrivateObjectDir();
+    if (!entityDir.endsWith("/")) {
+      entityDir = `${entityDir}/`;
+    }
+    const objectEntityPath = `${entityDir}${entityId}`;
+    const { bucketName, objectName } = parseObjectPath(objectEntityPath);
+    const bucket = objectStorageClient.bucket(bucketName);
+    const objectFile = bucket.file(objectName);
+    const [exists] = await objectFile.exists();
     if (!exists) {
       throw new ObjectNotFoundError();
     }
-    return file;
+    return objectFile;
   }
 
-  normalizeObjectEntityPath(urlOrPath: string): string {
-    const privateDir = this.getPrivateObjectDir();
-    if (urlOrPath.startsWith("/objects/")) {
-      return `${privateDir}/${urlOrPath.replace("/objects/", "")}`;
+  normalizeObjectEntityPath(rawPath: string): string {
+    if (!rawPath.startsWith("https://storage.googleapis.com/")) {
+      return rawPath;
     }
-    if (urlOrPath.startsWith(privateDir)) {
-      return urlOrPath;
+
+    const url = new URL(rawPath);
+    const rawObjectPath = url.pathname;
+
+    let objectEntityDir = this.getPrivateObjectDir();
+    if (!objectEntityDir.endsWith("/")) {
+      objectEntityDir = `${objectEntityDir}/`;
     }
-    return `${privateDir}/${urlOrPath}`;
+
+    if (!rawObjectPath.startsWith(objectEntityDir)) {
+      return rawObjectPath;
+    }
+
+    const entityId = rawObjectPath.slice(objectEntityDir.length);
+    return `/objects/${entityId}`;
   }
 
   async getObjectEntityUploadURL(): Promise<{ uploadURL: string; filePath: string }> {
-    const privateDir = this.getPrivateObjectDir();
-    const fileName = `${randomUUID()}`;
-    const filePath = `${privateDir}/${fileName}`;
-    const file = objectStorageClient.bucket("").file(filePath);
+    try {
+      const privateObjectDir = this.getPrivateObjectDir();
+      if (!privateObjectDir) {
+        throw new Error("PRIVATE_OBJECT_DIR not set");
+      }
 
-    const [url] = await file.getSignedUrl({
-      version: "v4",
-      action: "write",
-      expires: Date.now() + 15 * 60 * 1000,
-      contentType: "image/*",
-    });
+      const objectId = randomUUID();
+      const fullPath = `${privateObjectDir}/${objectId}`;
 
-    return {
-      uploadURL: url,
-      filePath: `/objects/${fileName}`,
-    };
+      const { bucketName, objectName } = parseObjectPath(fullPath);
+
+      const uploadURL = await signObjectURL({
+        bucketName,
+        objectName,
+        method: "PUT",
+        ttlSec: 900,
+      });
+
+      return {
+        uploadURL,
+        filePath: `/objects/${objectId}`,
+      };
+    } catch (error) {
+      console.error('[ObjectStorage] Error getting upload URL:', error);
+      throw error;
+    }
   }
 
   downloadObject(file: File, res: Response): void {

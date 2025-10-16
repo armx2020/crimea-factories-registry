@@ -4,7 +4,8 @@ import { Factory, Network } from "@shared/schema";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { X, Search } from "lucide-react";
 
 interface FactoryFiltersProps {
   factories: Factory[];
@@ -12,11 +13,13 @@ interface FactoryFiltersProps {
 }
 
 export interface FilterState {
+  searchQuery: string;
   cities: string[];
   networks: string[];
 }
 
 export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProps) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedNetworks, setSelectedNetworks] = useState<string[]>([]);
 
@@ -58,6 +61,15 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [factories, networks]);
 
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    onFilterChange({
+      searchQuery: value,
+      cities: selectedCities,
+      networks: selectedNetworks,
+    });
+  };
+
   const handleCityToggle = (city: string) => {
     const newCities = selectedCities.includes(city)
       ? selectedCities.filter(c => c !== city)
@@ -65,6 +77,7 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
     
     setSelectedCities(newCities);
     onFilterChange({
+      searchQuery,
       cities: newCities,
       networks: selectedNetworks,
     });
@@ -77,15 +90,18 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
     
     setSelectedNetworks(newNetworks);
     onFilterChange({
+      searchQuery,
       cities: selectedCities,
       networks: newNetworks,
     });
   };
 
   const handleReset = () => {
+    setSearchQuery("");
     setSelectedCities([]);
     setSelectedNetworks([]);
     onFilterChange({
+      searchQuery: "",
       cities: [],
       networks: [],
     });
@@ -93,6 +109,23 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
 
   return (
     <div className="space-y-6">
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">
+          Поиск по названию
+        </Label>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Название завода..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-9"
+            data-testid="input-search-factory"
+          />
+        </div>
+      </div>
+
       <div className="space-y-3">
         <Label className="text-sm font-medium">
           Города

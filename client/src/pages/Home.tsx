@@ -36,6 +36,7 @@ export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
+    searchQuery: "",
     cities: [],
     networks: [],
   });
@@ -110,6 +111,9 @@ export default function Home() {
 
   const filteredFactories = factories
     .filter((factory) => {
+      if (filters.searchQuery && !factory.name.toLowerCase().includes(filters.searchQuery.toLowerCase())) {
+        return false;
+      }
       if (filters.cities.length > 0 && !filters.cities.includes(factory.city)) return false;
       if (filters.networks.length > 0) {
         if (!factory.networkId || !filters.networks.includes(factory.networkId)) {

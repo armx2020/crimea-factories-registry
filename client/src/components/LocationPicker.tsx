@@ -22,9 +22,22 @@ export function LocationPicker({ latitude, longitude, city, onLocationSelect }: 
 
     const map = L.map(mapContainerRef.current).setView([initialLat, initialLng], 13);
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    });
+
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri, Maxar, Earthstar Geographics'
+    });
+
+    const baseMaps = {
+      "Карта": osmLayer,
+      "Спутник": satelliteLayer
+    };
+
+    osmLayer.addTo(map);
+
+    L.control.layers(baseMaps).addTo(map);
 
     const icon = L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',

@@ -81,6 +81,8 @@ export function FactoryForm({
   const photo3 = form.watch("photo3");
 
   useEffect(() => {
+    if (!open) return;
+    
     if (factory) {
       form.reset({
         name: factory.name || "",
@@ -112,7 +114,7 @@ export function FactoryForm({
         photo3: "",
       });
     }
-  }, [factory, form]);
+  }, [open, factory]);
 
   useEffect(() => {
     if (!open) return;

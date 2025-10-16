@@ -14,12 +14,14 @@ function Navigation() {
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center gap-2 py-3">
+      <div className="container mx-auto px-3 sm:px-4">
+        <div className="flex items-center gap-1 sm:gap-2 py-2 sm:py-3">
           <Link href="/">
             <Button
               variant={location === "/" ? "default" : "ghost"}
+              size="sm"
               data-testid="nav-factories"
+              className="text-xs sm:text-sm"
             >
               Заводы
             </Button>
@@ -27,7 +29,9 @@ function Navigation() {
           <Link href="/networks">
             <Button
               variant={location === "/networks" ? "default" : "ghost"}
+              size="sm"
               data-testid="nav-networks"
+              className="text-xs sm:text-sm"
             >
               Сети
             </Button>
@@ -40,14 +44,14 @@ function Navigation() {
 
 function Router() {
   return (
-    <>
+    <div className="min-h-screen overflow-x-hidden">
       <Navigation />
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/networks" component={Networks} />
         <Route component={NotFound} />
       </Switch>
-    </>
+    </div>
   );
 }
 

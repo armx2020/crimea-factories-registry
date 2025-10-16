@@ -29,18 +29,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Loader2, Upload, X, MapPin, ExternalLink } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { LocationPicker } from "@/components/LocationPicker";
@@ -225,18 +213,20 @@ export function FactoryForm({
   const searchAddress = useCallback(async (query: string, cityName: string) => {
     if (!query || query.length < 3 || !cityName) {
       setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
       return;
     }
 
     setIsSearchingAddress(true);
     try {
-      const searchQuery = `${query}, ${cityName}, Крым`;
+      const searchQuery = `${query}, ${cityName}`;
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?` +
         `q=${encodeURIComponent(searchQuery)}&` +
         `format=json&` +
         `limit=5&` +
-        `countrycodes=ru&` +
+        `viewbox=32.5,44.4,36.7,46.2&` +
+        `bounded=1&` +
         `addressdetails=1`,
         {
           headers: {
@@ -247,11 +237,14 @@ export function FactoryForm({
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Address search results:', data);
         setAddressSuggestions(data);
         setShowAddressSuggestions(data.length > 0);
       }
     } catch (error) {
       console.error('Address search error:', error);
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
     } finally {
       setIsSearchingAddress(false);
     }
@@ -368,47 +361,35 @@ export function FactoryForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Адрес</FormLabel>
-                    <Popover open={showAddressSuggestions} onOpenChange={setShowAddressSuggestions}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <div className="relative">
-                            <Input 
-                              {...field} 
-                              placeholder="ул. Промышленная, 5" 
-                              data-testid="input-address"
-                              onFocus={() => {
-                                if (addressSuggestions.length > 0) {
-                                  setShowAddressSuggestions(true);
-                                }
-                              }}
-                            />
-                            {isSearchingAddress && (
-                              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                            )}
+                    <div className="relative">
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="ул. Промышленная, 5" 
+                          data-testid="input-address"
+                        />
+                      </FormControl>
+                      {isSearchingAddress && (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                      )}
+                      {!isSearchingAddress && addressSuggestions.length > 0 && showAddressSuggestions && (
+                        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
+                          <div className="p-2 space-y-1">
+                            {addressSuggestions.map((suggestion, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                onClick={() => handleSelectAddress(suggestion)}
+                                className="w-full flex items-start gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                              >
+                                <MapPin className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
+                                <span className="text-left">{suggestion.display_name}</span>
+                              </button>
+                            ))}
                           </div>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0" align="start">
-                        <Command>
-                          <CommandList>
-                            <CommandEmpty>Адреса не найдены</CommandEmpty>
-                            <CommandGroup>
-                              {addressSuggestions.map((suggestion, index) => (
-                                <CommandItem
-                                  key={index}
-                                  value={suggestion.display_name}
-                                  onSelect={() => handleSelectAddress(suggestion)}
-                                  className="cursor-pointer"
-                                >
-                                  <MapPin className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
-                                  <span className="text-sm">{suggestion.display_name}</span>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                        </div>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

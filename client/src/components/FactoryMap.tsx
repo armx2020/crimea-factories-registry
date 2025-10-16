@@ -110,7 +110,7 @@ export function FactoryMap({ factories, onFactoryClick }: FactoryMapProps) {
   return (
     <div 
       ref={mapContainerRef} 
-      className="w-full h-full min-h-[500px] rounded-md"
+      className="w-full h-full min-h-[700px] rounded-md"
       data-testid="map-factories"
     />
   );

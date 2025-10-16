@@ -40,7 +40,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Loader2, Upload, X, MapPin } from "lucide-react";
+import { Loader2, Upload, X, MapPin, ExternalLink } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { LocationPicker } from "@/components/LocationPicker";
 
@@ -511,12 +511,36 @@ export function FactoryForm({
               />
             </div>
 
-            <LocationPicker
-              latitude={latitude}
-              longitude={longitude}
-              city={city}
-              onLocationSelect={handleLocationSelect}
-            />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <FormLabel>Местоположение на карте</FormLabel>
+                {latitude && longitude && (
+                  <a
+                    href={`https://yandex.ru/maps/?ll=${longitude},${latitude}&z=17&l=sat`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex"
+                  >
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      data-testid="button-open-yandex-maps"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      <span>Открыть в Яндекс.Картах</span>
+                    </Button>
+                  </a>
+                )}
+              </div>
+              <LocationPicker
+                latitude={latitude}
+                longitude={longitude}
+                city={city}
+                onLocationSelect={handleLocationSelect}
+              />
+            </div>
 
             <FormField
               control={form.control}

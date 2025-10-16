@@ -20,10 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2, Upload, X } from "lucide-react";
-import { useState } from "react";
-import { ObjectUploader } from "@/components/ObjectUploader";
-import type { UploadResult } from "@uppy/core";
-import { apiRequest } from "@/lib/queryClient";
+import { PhotoUploader } from "@/components/PhotoUploader";
 
 const formSchema = insertFactorySchema.extend({
   latitude: z.string().optional(),
@@ -50,8 +47,6 @@ export function FactoryForm({
   onSubmit,
   isPending,
 }: FactoryFormProps) {
-  const [uploadingPhoto, setUploadingPhoto] = useState<number | null>(null);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,23 +65,8 @@ export function FactoryForm({
     },
   });
 
-  const handlePhotoUpload = async () => {
-    const response = await apiRequest<{ uploadURL: string }>("POST", "/api/objects/upload");
-    return {
-      method: "PUT" as const,
-      url: response.uploadURL,
-    };
-  };
-
-  const handlePhotoComplete = (photoNum: number, result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful && result.successful.length > 0) {
-      const uploadURL = result.successful[0].uploadURL;
-      if (uploadURL) {
-        const objectPath = `/objects/${uploadURL.split('/').slice(-1)[0]}`;
-        form.setValue(`photo${photoNum}` as "photo1" | "photo2" | "photo3", objectPath);
-      }
-    }
-    setUploadingPhoto(null);
+  const handlePhotoUploaded = (photoNum: number, photoUrl: string) => {
+    form.setValue(`photo${photoNum}` as "photo1" | "photo2" | "photo3", photoUrl);
   };
 
   const handleRemovePhoto = (photoNum: number) => {
@@ -285,23 +265,12 @@ export function FactoryForm({
                           </Button>
                         </div>
                       ) : (
-                        <ObjectUploader
-                          maxNumberOfFiles={1}
-                          maxFileSize={10485760}
-                          onGetUploadParameters={handlePhotoUpload}
-                          onComplete={(result) => handlePhotoComplete(num, result)}
-                          buttonVariant="outline"
-                          buttonClassName="w-full aspect-square"
-                        >
-                          {uploadingPhoto === num ? (
-                            <Loader2 className="h-8 w-8 animate-spin" />
-                          ) : (
-                            <div className="flex flex-col items-center gap-2">
-                              <Upload className="h-8 w-8" />
-                              <span className="text-xs">Фото {num}</span>
-                            </div>
-                          )}
-                        </ObjectUploader>
+                        <PhotoUploader
+                          onPhotoUploaded={(url) => handlePhotoUploaded(num, url)}
+                          buttonText={`Фото ${num}`}
+                          variant="outline"
+                          className="w-full aspect-square"
+                        />
                       )}
                     </div>
                   );

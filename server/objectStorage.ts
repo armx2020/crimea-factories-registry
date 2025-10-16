@@ -84,7 +84,7 @@ export class ObjectStorageService {
     return `${privateDir}/${urlOrPath}`;
   }
 
-  async getObjectEntityUploadURL(): Promise<string> {
+  async getObjectEntityUploadURL(): Promise<{ uploadURL: string; filePath: string }> {
     const privateDir = this.getPrivateObjectDir();
     const fileName = `${randomUUID()}`;
     const filePath = `${privateDir}/${fileName}`;
@@ -97,7 +97,10 @@ export class ObjectStorageService {
       contentType: "image/*",
     });
 
-    return url;
+    return {
+      uploadURL: url,
+      filePath: `/objects/${fileName}`,
+    };
   }
 
   downloadObject(file: File, res: Response): void {

@@ -109,12 +109,26 @@ export default function Home() {
     },
   });
 
-  const filteredFactories = factories.filter((factory) => {
-    if (filters.city !== "all" && factory.city !== filters.city) return false;
-    if (factory.capacity < filters.minCapacity || factory.capacity > filters.maxCapacity)
-      return false;
-    return true;
-  });
+  const filteredFactories = factories
+    .filter((factory) => {
+      if (filters.city !== "all" && factory.city !== filters.city) return false;
+      if (factory.capacity < filters.minCapacity || factory.capacity > filters.maxCapacity)
+        return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const aRanking = a.ranking || 0;
+      const bRanking = b.ranking || 0;
+      
+      if (aRanking > 0 && bRanking > 0) {
+        return aRanking - bRanking;
+      }
+      
+      if (aRanking > 0) return -1;
+      if (bRanking > 0) return 1;
+      
+      return 0;
+    });
 
   const handleFormSubmit = async (data: any) => {
     if (editingFactory) {

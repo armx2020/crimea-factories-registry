@@ -1,7 +1,7 @@
 import { Factory } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Factory as FactoryIcon, Trophy, ExternalLink } from "lucide-react";
+import { MapPin, Factory as FactoryIcon, ExternalLink } from "lucide-react";
 
 interface FactoryCardProps {
   factory: Factory;
@@ -45,8 +45,7 @@ export function FactoryCard({ factory, onEdit }: FactoryCardProps) {
               </div>
             </div>
             {factory.ranking && factory.ranking > 0 && (
-              <Badge variant="default" className="gap-1.5 shrink-0" data-testid={`badge-ranking-${factory.id}`}>
-                <Trophy className="h-3.5 w-3.5" />
+              <Badge variant="default" className="shrink-0" data-testid={`badge-ranking-${factory.id}`}>
                 <span>#{factory.ranking}</span>
               </Badge>
             )}

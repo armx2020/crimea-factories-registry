@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Factory, Network } from "@shared/schema";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
@@ -15,18 +14,11 @@ interface FactoryFiltersProps {
 export interface FilterState {
   cities: string[];
   networks: string[];
-  minCapacity: number;
-  maxCapacity: number;
 }
 
 export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProps) {
-  const capacities = factories.map(f => f.capacity);
-  const minCap = Math.min(...capacities, 0);
-  const maxCap = Math.max(...capacities, 1000);
-
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedNetworks, setSelectedNetworks] = useState<string[]>([]);
-  const [capacityRange, setCapacityRange] = useState<[number, number]>([minCap, maxCap]);
 
   const { data: networks = [] } = useQuery<Network[]>({
     queryKey: ["/api/networks"],
@@ -75,8 +67,6 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
     onFilterChange({
       cities: newCities,
       networks: selectedNetworks,
-      minCapacity: capacityRange[0],
-      maxCapacity: capacityRange[1],
     });
   };
 
@@ -89,31 +79,15 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
     onFilterChange({
       cities: selectedCities,
       networks: newNetworks,
-      minCapacity: capacityRange[0],
-      maxCapacity: capacityRange[1],
-    });
-  };
-
-  const handleCapacityChange = (values: number[]) => {
-    const range: [number, number] = [values[0], values[1]];
-    setCapacityRange(range);
-    onFilterChange({
-      cities: selectedCities,
-      networks: selectedNetworks,
-      minCapacity: range[0],
-      maxCapacity: range[1],
     });
   };
 
   const handleReset = () => {
     setSelectedCities([]);
     setSelectedNetworks([]);
-    setCapacityRange([minCap, maxCap]);
     onFilterChange({
       cities: [],
       networks: [],
-      minCapacity: minCap,
-      maxCapacity: maxCap,
     });
   };
 
@@ -186,26 +160,6 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
           </div>
         </div>
       )}
-
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">
-          Мощность (м³/ч)
-        </Label>
-        <div className="pt-2">
-          <Slider
-            min={minCap}
-            max={maxCap}
-            step={10}
-            value={capacityRange}
-            onValueChange={handleCapacityChange}
-            data-testid="slider-capacity"
-          />
-        </div>
-        <div className="flex justify-between text-sm text-muted-foreground font-mono">
-          <span data-testid="text-min-capacity">{capacityRange[0]}</span>
-          <span data-testid="text-max-capacity">{capacityRange[1]}</span>
-        </div>
-      </div>
 
       <Button
         variant="outline"

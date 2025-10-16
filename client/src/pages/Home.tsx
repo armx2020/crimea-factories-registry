@@ -38,8 +38,6 @@ export default function Home() {
   const [filters, setFilters] = useState<FilterState>({
     cities: [],
     networks: [],
-    minCapacity: 0,
-    maxCapacity: 10000,
   });
 
   const { data: factories = [], isLoading } = useQuery<Factory[]>({
@@ -118,8 +116,6 @@ export default function Home() {
           return false;
         }
       }
-      if (factory.capacity < filters.minCapacity || factory.capacity > filters.maxCapacity)
-        return false;
       return true;
     })
     .sort((a, b) => {

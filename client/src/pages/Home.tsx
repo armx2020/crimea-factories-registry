@@ -176,39 +176,42 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center">
-              <FactoryIcon className="h-6 w-6 text-primary" />
+        <div className="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+              <FactoryIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
-            <div>
-              <h1 className="text-lg font-semibold leading-tight" data-testid="text-app-title">
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-lg font-semibold leading-tight truncate" data-testid="text-app-title">
                 Реестр Бетонных Заводов
               </h1>
               <p className="text-xs text-muted-foreground">Крым</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-              <TabsList data-testid="tabs-view-mode">
-                <TabsTrigger value="list" className="gap-2" data-testid="tab-list">
+              <TabsList data-testid="tabs-view-mode" className="h-9">
+                <TabsTrigger value="list" className="gap-1 sm:gap-2 px-2 sm:px-3" data-testid="tab-list">
                   <List className="h-4 w-4" />
                   <span className="hidden sm:inline">Список</span>
                 </TabsTrigger>
-                <TabsTrigger value="map" className="gap-2" data-testid="tab-map">
+                <TabsTrigger value="map" className="gap-1 sm:gap-2 px-2 sm:px-3" data-testid="tab-map">
                   <Map className="h-4 w-4" />
                   <span className="hidden sm:inline">Карта</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>
 
-            <Button onClick={handleAddFactory} data-testid="button-add-factory">
+            <Button onClick={handleAddFactory} data-testid="button-add-factory" size="sm" className="hidden sm:flex">
               <Plus className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Добавить завод</span>
-              <span className="sm:hidden">Добавить</span>
+              Добавить завод
+            </Button>
+            
+            <Button onClick={handleAddFactory} size="icon" className="sm:hidden" data-testid="button-add-factory-mobile">
+              <Plus className="h-4 w-4" />
             </Button>
 
             <ThemeToggle />
@@ -216,8 +219,8 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
-        <div className="flex gap-4 sm:gap-6">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 max-w-full overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
           <aside className="hidden lg:block w-72 shrink-0">
             <div className="sticky top-24 space-y-4">
               <div className="flex items-center justify-between">

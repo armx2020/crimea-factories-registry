@@ -36,7 +36,7 @@ export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
-    city: "all",
+    cities: [],
     minCapacity: 0,
     maxCapacity: 10000,
   });
@@ -111,7 +111,7 @@ export default function Home() {
 
   const filteredFactories = factories
     .filter((factory) => {
-      if (filters.city !== "all" && factory.city !== filters.city) return false;
+      if (filters.cities.length > 0 && !filters.cities.includes(factory.city)) return false;
       if (factory.capacity < filters.minCapacity || factory.capacity > filters.maxCapacity)
         return false;
       return true;

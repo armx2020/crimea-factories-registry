@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Factory } from "@shared/schema";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X, ChevronDown } from "lucide-react";
 
 interface FactoryFiltersProps {
   factories: Factory[];
@@ -12,24 +12,43 @@ interface FactoryFiltersProps {
 }
 
 export interface FilterState {
-  city: string;
+  cities: string[];
   minCapacity: number;
   maxCapacity: number;
 }
 
 export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProps) {
-  const cities = Array.from(new Set(factories.map(f => f.city).filter(c => c && c.trim() !== ""))).sort();
   const capacities = factories.map(f => f.capacity);
   const minCap = Math.min(...capacities, 0);
   const maxCap = Math.max(...capacities, 1000);
 
-  const [city, setCity] = useState<string>("all");
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [capacityRange, setCapacityRange] = useState<[number, number]>([minCap, maxCap]);
+  const [showAllCities, setShowAllCities] = useState(false);
 
-  const handleCityChange = (value: string) => {
-    setCity(value);
+  const cityStats = useMemo(() => {
+    const stats = new Map<string, number>();
+    factories.forEach((factory) => {
+      const city = factory.city;
+      if (city && city.trim() !== "") {
+        stats.set(city, (stats.get(city) || 0) + 1);
+      }
+    });
+    return Array.from(stats.entries())
+      .map(([city, count]) => ({ city, count }))
+      .sort((a, b) => a.city.localeCompare(b.city));
+  }, [factories]);
+
+  const displayedCities = showAllCities ? cityStats : cityStats.slice(0, 5);
+
+  const handleCityToggle = (city: string) => {
+    const newCities = selectedCities.includes(city)
+      ? selectedCities.filter(c => c !== city)
+      : [...selectedCities, city];
+    
+    setSelectedCities(newCities);
     onFilterChange({
-      city: value,
+      cities: newCities,
       minCapacity: capacityRange[0],
       maxCapacity: capacityRange[1],
     });
@@ -39,17 +58,17 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
     const range: [number, number] = [values[0], values[1]];
     setCapacityRange(range);
     onFilterChange({
-      city,
+      cities: selectedCities,
       minCapacity: range[0],
       maxCapacity: range[1],
     });
   };
 
   const handleReset = () => {
-    setCity("all");
+    setSelectedCities([]);
     setCapacityRange([minCap, maxCap]);
     onFilterChange({
-      city: "all",
+      cities: [],
       minCapacity: minCap,
       maxCapacity: maxCap,
     });
@@ -58,20 +77,48 @@ export function FactoryFilters({ factories, onFilterChange }: FactoryFiltersProp
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Label htmlFor="city-filter" className="text-sm font-medium">
-          Город
+        <Label className="text-sm font-medium">
+          Города
         </Label>
-        <Select value={city} onValueChange={handleCityChange}>
-          <SelectTrigger id="city-filter" data-testid="select-city-filter">
-            <SelectValue placeholder="Все города" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все города</SelectItem>
-            {cities.map(c => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="space-y-2">
+          {displayedCities.map(({ city, count }) => (
+            <div
+              key={city}
+              className="flex items-center justify-between gap-2"
+              data-testid={`city-filter-${city}`}
+            >
+              <div className="flex items-center gap-2 flex-1">
+                <Checkbox
+                  id={`city-${city}`}
+                  checked={selectedCities.includes(city)}
+                  onCheckedChange={() => handleCityToggle(city)}
+                  data-testid={`checkbox-city-${city}`}
+                />
+                <label
+                  htmlFor={`city-${city}`}
+                  className="text-sm cursor-pointer flex-1"
+                >
+                  {city}
+                </label>
+              </div>
+              <span className="text-sm text-muted-foreground font-mono">
+                {count}
+              </span>
+            </div>
+          ))}
+          {cityStats.length > 5 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAllCities(!showAllCities)}
+              className="w-full gap-2"
+              data-testid="button-toggle-cities"
+            >
+              {showAllCities ? "Показать меньше" : "Показать еще"}
+              <ChevronDown className={`h-4 w-4 transition-transform ${showAllCities ? "rotate-180" : ""}`} />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">

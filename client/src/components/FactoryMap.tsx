@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Factory } from "@shared/schema";
+import { CITY_COORDINATES } from "@shared/cityCoordinates";
 import L from "leaflet";
 
 interface FactoryMapProps {
@@ -39,9 +40,20 @@ export function FactoryMap({ factories, onFactoryClick }: FactoryMapProps) {
       }
     });
 
-    const factoriesWithCoords = factories.filter(
-      f => f.latitude && f.longitude
-    );
+    const factoriesWithCoords = factories.map(factory => {
+      let lat: number | null = null;
+      let lng: number | null = null;
+
+      if (factory.latitude && factory.longitude) {
+        lat = parseFloat(factory.latitude);
+        lng = parseFloat(factory.longitude);
+      } else if (factory.city && CITY_COORDINATES[factory.city]) {
+        lat = CITY_COORDINATES[factory.city].lat;
+        lng = CITY_COORDINATES[factory.city].lng;
+      }
+
+      return { factory, lat, lng };
+    }).filter(item => item.lat !== null && item.lng !== null);
 
     const icon = L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -53,11 +65,8 @@ export function FactoryMap({ factories, onFactoryClick }: FactoryMapProps) {
       shadowSize: [41, 41]
     });
 
-    factoriesWithCoords.forEach(factory => {
-      const lat = parseFloat(factory.latitude!);
-      const lng = parseFloat(factory.longitude!);
-      
-      const marker = L.marker([lat, lng], { icon })
+    factoriesWithCoords.forEach(({ factory, lat, lng }) => {
+      const marker = L.marker([lat!, lng!], { icon })
         .bindPopup(`
           <div class="p-2 min-w-[200px]">
             <h3 class="font-semibold text-base mb-1">${factory.name}</h3>
@@ -73,7 +82,7 @@ export function FactoryMap({ factories, onFactoryClick }: FactoryMapProps) {
 
     if (factoriesWithCoords.length > 0) {
       const bounds = L.latLngBounds(
-        factoriesWithCoords.map(f => [parseFloat(f.latitude!), parseFloat(f.longitude!)])
+        factoriesWithCoords.map(({ lat, lng }) => [lat!, lng!])
       );
       mapRef.current.fitBounds(bounds, { padding: [50, 50] });
     }

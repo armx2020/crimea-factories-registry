@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Factory, insertFactorySchema } from "@shared/schema";
+import { CITY_COORDINATES } from "@shared/cityCoordinates";
 import { z } from "zod";
 import { useEffect } from "react";
 import {
@@ -30,24 +31,7 @@ import {
 import { Loader2, Upload, X } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
 
-const CRIMEA_CITIES = [
-  "Алупка",
-  "Алушта",
-  "Армянск",
-  "Бахчисарай",
-  "Белогорск",
-  "Джанкой",
-  "Евпатория",
-  "Керчь",
-  "Красноперекопск",
-  "Саки",
-  "Симферополь",
-  "Старый Крым",
-  "Судак",
-  "Феодосия",
-  "Щёлкино",
-  "Ялта",
-];
+const CRIMEA_CITIES = Object.keys(CITY_COORDINATES);
 
 const formSchema = insertFactorySchema.extend({
   latitude: z.string().optional(),
@@ -229,7 +213,17 @@ export function FactoryForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Город</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const coords = CITY_COORDINATES[value];
+                        if (coords && !form.getValues("latitude") && !form.getValues("longitude")) {
+                          form.setValue("latitude", coords.lat.toString());
+                          form.setValue("longitude", coords.lng.toString());
+                        }
+                      }} 
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger data-testid="select-city">
                           <SelectValue placeholder="Выберите город" />

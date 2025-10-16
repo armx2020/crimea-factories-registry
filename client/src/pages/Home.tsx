@@ -240,7 +240,7 @@ export default function Home() {
                         <FactoryCard
                           key={factory.id}
                           factory={factory}
-                          onView={handleViewFactory}
+                          onEdit={handleEditFactory}
                         />
                       ))}
                     </div>

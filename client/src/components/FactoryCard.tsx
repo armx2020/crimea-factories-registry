@@ -5,17 +5,17 @@ import { MapPin, Factory as FactoryIcon } from "lucide-react";
 
 interface FactoryCardProps {
   factory: Factory;
-  onView: (factory: Factory) => void;
+  onEdit: (factory: Factory) => void;
 }
 
-export function FactoryCard({ factory, onView }: FactoryCardProps) {
+export function FactoryCard({ factory, onEdit }: FactoryCardProps) {
   const photos = [factory.photo1, factory.photo2, factory.photo3].filter(Boolean);
   
   return (
     <Card 
       className="overflow-hidden hover-elevate active-elevate-2 transition-all cursor-pointer" 
       data-testid={`card-factory-${factory.id}`}
-      onClick={() => onView(factory)}
+      onClick={() => onEdit(factory)}
     >
       <div className="flex flex-col sm:flex-row">
         <div className="sm:w-48 shrink-0">

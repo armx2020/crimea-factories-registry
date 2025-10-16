@@ -1,5 +1,6 @@
-import { type Factory, type InsertFactory } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { type Factory, type InsertFactory, factories } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getAllFactories(): Promise<Factory[]>;
@@ -9,48 +10,40 @@ export interface IStorage {
   deleteFactory(id: string): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private factories: Map<string, Factory>;
-
-  constructor() {
-    this.factories = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
   async getAllFactories(): Promise<Factory[]> {
-    return Array.from(this.factories.values());
+    return await db.select().from(factories);
   }
 
   async getFactory(id: string): Promise<Factory | undefined> {
-    return this.factories.get(id);
+    const [factory] = await db.select().from(factories).where(eq(factories.id, id));
+    return factory || undefined;
   }
 
   async createFactory(insertFactory: InsertFactory): Promise<Factory> {
-    const id = randomUUID();
-    const factory: Factory = { 
-      ...insertFactory, 
-      id,
-      latitude: insertFactory.latitude || null,
-      longitude: insertFactory.longitude || null,
-      photo1: insertFactory.photo1 || null,
-      photo2: insertFactory.photo2 || null,
-      photo3: insertFactory.photo3 || null,
-    };
-    this.factories.set(id, factory);
+    const [factory] = await db
+      .insert(factories)
+      .values(insertFactory)
+      .returning();
     return factory;
   }
 
   async updateFactory(id: string, updates: Partial<InsertFactory>): Promise<Factory | undefined> {
-    const factory = this.factories.get(id);
-    if (!factory) return undefined;
-    
-    const updatedFactory = { ...factory, ...updates };
-    this.factories.set(id, updatedFactory);
-    return updatedFactory;
+    const [factory] = await db
+      .update(factories)
+      .set(updates)
+      .where(eq(factories.id, id))
+      .returning();
+    return factory || undefined;
   }
 
   async deleteFactory(id: string): Promise<boolean> {
-    return this.factories.delete(id);
+    const result = await db
+      .delete(factories)
+      .where(eq(factories.id, id))
+      .returning();
+    return result.length > 0;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

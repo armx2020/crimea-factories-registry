@@ -12,6 +12,8 @@ export const factories = pgTable("factories", {
   capacity: integer("capacity").notNull(),
   yearlyOutput: integer("yearly_output").notNull(),
   description: text("description").notNull(),
+  website: text("website"),
+  ranking: integer("ranking"),
   latitude: decimal("latitude", { precision: 10, scale: 7 }),
   longitude: decimal("longitude", { precision: 10, scale: 7 }),
   photo1: text("photo1"),

@@ -1,7 +1,7 @@
 import { Factory } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Factory as FactoryIcon } from "lucide-react";
+import { MapPin, Factory as FactoryIcon, Trophy, ExternalLink } from "lucide-react";
 
 interface FactoryCardProps {
   factory: Factory;
@@ -32,16 +32,24 @@ export function FactoryCard({ factory, onEdit }: FactoryCardProps) {
         </div>
         
         <CardContent className="flex-1 p-4 space-y-2">
-          <div>
-            <h3 className="text-lg font-semibold leading-tight" data-testid={`text-factory-name-${factory.id}`}>
-              {factory.name}
-            </h3>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
-              <MapPin className="h-3.5 w-3.5 shrink-0" />
-              <span data-testid={`text-factory-city-${factory.id}`}>{factory.city}</span>
-              <span className="mx-1">•</span>
-              <span data-testid={`text-factory-model-${factory.id}`}>{factory.model}</span>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold leading-tight" data-testid={`text-factory-name-${factory.id}`}>
+                {factory.name}
+              </h3>
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                <span data-testid={`text-factory-city-${factory.id}`}>{factory.city}</span>
+                <span className="mx-1">•</span>
+                <span data-testid={`text-factory-model-${factory.id}`}>{factory.model}</span>
+              </div>
             </div>
+            {factory.ranking && factory.ranking > 0 && (
+              <Badge variant="default" className="gap-1.5 shrink-0" data-testid={`badge-ranking-${factory.id}`}>
+                <Trophy className="h-3.5 w-3.5" />
+                <span>#{factory.ranking}</span>
+              </Badge>
+            )}
           </div>
           
           <div className="flex flex-wrap gap-2">
@@ -53,6 +61,20 @@ export function FactoryCard({ factory, onEdit }: FactoryCardProps) {
               <span className="font-mono">{factory.yearlyOutput}</span>
               <span className="ml-1">м³/год</span>
             </Badge>
+            {factory.website && (
+              <a 
+                href={factory.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex"
+              >
+                <Badge variant="outline" className="gap-1.5 hover:bg-accent" data-testid={`badge-website-${factory.id}`}>
+                  <ExternalLink className="h-3 w-3" />
+                  <span>Сайт</span>
+                </Badge>
+              </a>
+            )}
           </div>
           
           <p className="text-sm text-muted-foreground line-clamp-2" data-testid={`text-description-${factory.id}`}>

@@ -54,6 +54,7 @@ const CRIMEA_CITIES = Object.keys(CITY_COORDINATES);
 const formSchema = insertFactorySchema.extend({
   latitude: z.string().optional(),
   longitude: z.string().optional(),
+  website: z.string().optional(),
   photo1: z.string().optional(),
   photo2: z.string().optional(),
   photo3: z.string().optional(),
@@ -86,6 +87,8 @@ export function FactoryForm({
       capacity: 0,
       yearlyOutput: 0,
       description: "",
+      website: "",
+      ranking: 0,
       latitude: "",
       longitude: "",
       photo1: "",
@@ -116,6 +119,8 @@ export function FactoryForm({
         capacity: factory.capacity || 0,
         yearlyOutput: factory.yearlyOutput || 0,
         description: factory.description || "",
+        website: factory.website || "",
+        ranking: factory.ranking || 0,
         latitude: factory.latitude || "",
         longitude: factory.longitude || "",
         photo1: factory.photo1 || "",
@@ -131,6 +136,8 @@ export function FactoryForm({
         capacity: 0,
         yearlyOutput: 0,
         description: "",
+        website: "",
+        ranking: 0,
         latitude: "",
         longitude: "",
         photo1: "",
@@ -423,6 +430,43 @@ export function FactoryForm({
                         placeholder="150000"
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         data-testid="input-yearly-output"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Сайт (опционально)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://example.com" data-testid="input-website" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="ranking"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Место в рейтинге (опционально)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="1"
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                        data-testid="input-ranking"
                       />
                     </FormControl>
                     <FormMessage />

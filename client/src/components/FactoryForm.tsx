@@ -15,6 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -22,6 +29,25 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Upload, X } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
+
+const CRIMEA_CITIES = [
+  "Алупка",
+  "Алушта",
+  "Армянск",
+  "Бахчисарай",
+  "Белогорск",
+  "Джанкой",
+  "Евпатория",
+  "Керчь",
+  "Красноперекопск",
+  "Саки",
+  "Симферополь",
+  "Старый Крым",
+  "Судак",
+  "Феодосия",
+  "Щёлкино",
+  "Ялта",
+];
 
 const formSchema = insertFactorySchema.extend({
   latitude: z.string().optional(),
@@ -203,9 +229,20 @@ export function FactoryForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Город</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Симферополь" data-testid="input-city" />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-city">
+                          <SelectValue placeholder="Выберите город" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CRIMEA_CITIES.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

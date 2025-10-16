@@ -20,20 +20,10 @@ export function FactoryCard({ factory, onEdit }: FactoryCardProps) {
       <div className="flex flex-col sm:flex-row">
         <div className="sm:w-48 shrink-0">
           {photos.length > 0 ? (
-            <div className="grid grid-cols-3 gap-0.5 h-32 sm:h-full bg-muted">
-              {photos.map((photo, idx) => (
-                <div
-                  key={idx}
-                  className="w-full h-full bg-cover bg-center"
-                  style={{ backgroundImage: `url(${photo})` }}
-                />
-              ))}
-              {photos.length < 3 && Array.from({ length: 3 - photos.length }).map((_, idx) => (
-                <div key={`empty-${idx}`} className="w-full h-full bg-muted flex items-center justify-center">
-                  <FactoryIcon className="h-6 w-6 text-muted-foreground/30" />
-                </div>
-              ))}
-            </div>
+            <div
+              className="h-32 sm:h-full bg-cover bg-center"
+              style={{ backgroundImage: `url(${photos[0]})` }}
+            />
           ) : (
             <div className="h-32 sm:h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
               <FactoryIcon className="h-12 w-12 text-primary/30" />

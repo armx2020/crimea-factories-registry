@@ -37,6 +37,7 @@ export default function Home() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     cities: [],
+    networks: [],
     minCapacity: 0,
     maxCapacity: 10000,
   });
@@ -112,6 +113,11 @@ export default function Home() {
   const filteredFactories = factories
     .filter((factory) => {
       if (filters.cities.length > 0 && !filters.cities.includes(factory.city)) return false;
+      if (filters.networks.length > 0) {
+        if (!factory.networkId || !filters.networks.includes(factory.networkId)) {
+          return false;
+        }
+      }
       if (factory.capacity < filters.minCapacity || factory.capacity > filters.maxCapacity)
         return false;
       return true;

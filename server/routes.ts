@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertFactorySchema } from "@shared/schema";
+import { insertFactorySchema, insertNetworkSchema } from "@shared/schema";
 import { z } from "zod";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
@@ -86,6 +86,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting factory:", error);
       res.status(500).json({ error: "Failed to delete factory" });
+    }
+  });
+
+  app.get("/api/networks", async (req, res) => {
+    try {
+      const networks = await storage.getAllNetworks();
+      res.json(networks);
+    } catch (error) {
+      console.error("Error fetching networks:", error);
+      res.status(500).json({ error: "Failed to fetch networks" });
+    }
+  });
+
+  app.get("/api/networks/:id", async (req, res) => {
+    try {
+      const network = await storage.getNetwork(req.params.id);
+      if (!network) {
+        return res.status(404).json({ error: "Network not found" });
+      }
+      res.json(network);
+    } catch (error) {
+      console.error("Error fetching network:", error);
+      res.status(500).json({ error: "Failed to fetch network" });
+    }
+  });
+
+  app.post("/api/networks", async (req, res) => {
+    try {
+      const validatedData = insertNetworkSchema.parse(req.body);
+      const network = await storage.createNetwork(validatedData);
+      res.status(201).json(network);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      console.error("Error creating network:", error);
+      res.status(500).json({ error: "Failed to create network" });
+    }
+  });
+
+  app.put("/api/networks/:id", async (req, res) => {
+    try {
+      const validatedData = insertNetworkSchema.partial().parse(req.body);
+      const network = await storage.updateNetwork(req.params.id, validatedData);
+      if (!network) {
+        return res.status(404).json({ error: "Network not found" });
+      }
+      res.json(network);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      console.error("Error updating network:", error);
+      res.status(500).json({ error: "Failed to update network" });
+    }
+  });
+
+  app.delete("/api/networks/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteNetwork(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Network not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting network:", error);
+      res.status(500).json({ error: "Failed to delete network" });
     }
   });
 

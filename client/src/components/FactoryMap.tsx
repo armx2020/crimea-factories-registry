@@ -80,6 +80,12 @@ export function FactoryMap({ factories, onFactoryClick }: FactoryMapProps) {
 
     factoriesWithCoords.forEach(({ factory, lat, lng }) => {
       const marker = L.marker([lat!, lng!], { icon })
+        .bindTooltip(factory.name, {
+          permanent: true,
+          direction: 'top',
+          className: 'factory-label',
+          offset: [0, -35]
+        })
         .bindPopup(`
           <div class="p-2 min-w-[200px]">
             <h3 class="font-semibold text-base mb-1">${factory.name}</h3>

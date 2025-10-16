@@ -355,3 +355,20 @@
     inset: -1px;
   }
 }
+
+/* Leaflet map factory labels */
+.factory-label {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #1a1a1a !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  white-space: nowrap !important;
+}
+
+.factory-label::before {
+  display: none !important;
+}

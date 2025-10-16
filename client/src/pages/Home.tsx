@@ -216,8 +216,8 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex gap-6">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="flex gap-4 sm:gap-6">
           <aside className="hidden lg:block w-72 shrink-0">
             <div className="sticky top-24 space-y-4">
               <div className="flex items-center justify-between">
@@ -248,7 +248,7 @@ export default function Home() {
             </div>
           </aside>
 
-          <div className="lg:hidden mb-4">
+          <div className="lg:hidden w-full mb-4">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" className="w-full" data-testid="button-mobile-filters">
@@ -256,12 +256,30 @@ export default function Home() {
                   Фильтры ({filteredFactories.length})
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left">
+              <SheetContent side="left" className="w-[85vw] sm:w-96">
                 <SheetHeader>
                   <SheetTitle>Фильтры</SheetTitle>
                 </SheetHeader>
-                <div className="mt-6">
+                <div className="mt-6 overflow-y-auto max-h-[calc(100vh-8rem)]">
                   <FactoryFilters factories={factories} onFilterChange={setFilters} />
+                  
+                  <div className="mt-6 rounded-lg border bg-card p-4 space-y-3" data-testid="summary-stats-mobile">
+                    <h3 className="font-semibold text-sm text-muted-foreground">Сводка</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Всего заводов:</span>
+                        <span className="text-lg font-semibold">
+                          {filteredFactories.length}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Суммарная мощность:</span>
+                        <span className="text-lg font-semibold">
+                          {filteredFactories.reduce((sum, f) => sum + (f.capacity || 0), 0).toLocaleString('ru-RU')} м³/ч
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>

@@ -185,7 +185,7 @@ export default function Home() {
             </div>
             <div className="min-w-0">
               <h1 className="text-sm sm:text-lg font-semibold leading-tight truncate" data-testid="text-app-title">
-                Реестр Бетонных Заводов
+                Реестр бетонных заводов 2
               </h1>
               <p className="text-xs text-muted-foreground">Крым</p>
             </div>
